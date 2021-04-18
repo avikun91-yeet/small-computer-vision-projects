@@ -1,0 +1,43 @@
+import cv2
+import numpy as np
+
+frame_width = 640
+frame_height = 400
+cap = cv2.VideoCapture(1)
+cap.set(3, frame_height)
+cap.set(4, frame_width)
+cap.set(10, 150)
+
+def empty(a):
+    pass
+cv2.namedWindow("trackBars")
+cv2.resizeWindow("trackBars", (400, 300))
+cv2.createTrackbar("Hue min", "trackBars", 0, 179, empty)
+cv2.createTrackbar("Hue max", "trackBars", 179, 179, empty)
+cv2.createTrackbar("Sat min", "trackBars", 0, 255, empty)
+cv2.createTrackbar("Sat max", "trackBars", 255, 255, empty)
+cv2.createTrackbar("Val min", "trackBars", 0, 255, empty)
+cv2.createTrackbar("Val max", "trackBars", 255, 255, empty)
+
+while True:
+    success, img = cap.read()
+    imghsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+
+    h_min = cv2.getTrackbarPos("Hue min", "trackBars")
+    h_max = cv2.getTrackbarPos("Hue max", "trackBars")
+    s_min = cv2.getTrackbarPos("Sat min", "trackBars")
+    s_max = cv2.getTrackbarPos("Sat max", "trackBars")
+    v_min = cv2.getTrackbarPos("Val min", "trackBars")
+    v_max = cv2.getTrackbarPos("Val max", "trackBars")
+
+    upper = np.array([h_max, s_max, v_max])
+    lower = np.array([h_min, s_min, v_min])
+
+    mask = cv2.inRange(imghsv, lower, upper)
+    imgMasked = cv2.bitwise_and(img, img, mask= mask)
+
+    cv2.imshow("result", img)
+    cv2.imshow("masked", imgMasked)
+    cv2.imshow("mask", mask)
+    if cv2.waitKey(1) and 0xFF == ord("q"):
+        break
