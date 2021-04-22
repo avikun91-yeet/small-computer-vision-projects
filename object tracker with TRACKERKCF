@@ -1,0 +1,32 @@
+import cv2
+
+cap = cv2.VideoCapture(0)
+
+tracker = cv2.TrackerKCF_create()
+
+
+while True:
+    success, img = cap.read()
+
+    cv2.imshow("Tracker", img)
+
+    k = cv2.waitKey(30) & 0xff
+    if k == 27:
+        break
+
+bbox = cv2.selectROI(img, False)
+ok = tracker.init(img, bbox)
+cv2.destroyWindow("ROI selector")
+
+while True:
+    ok, img = cap.read()
+    ok, bbox = tracker.update(img)
+
+    if ok:
+        p1 = (int(bbox[0]), int(bbox[1]))
+        p2 = (int(bbox[0]) + int(bbox[2]), int(bbox[3])+int(bbox[1]))
+        cv2.rectangle(img, p1, p2, (0,0,0), 2, 2)
+
+    cv2.imshow("tracking", img)
+    k = cv2.waitKey(1) & 0xff
+    if k == 27: break
